@@ -1,0 +1,254 @@
+vlan 10
+name SALA1
+vlan 20
+name SALA2
+vlan 30
+name SALA3
+vlan 40
+name SALA4
+vlan 50
+name ADMIN
+
+📌 Switch 1 (Dirección)
+! PC Escritorio
+interface GigabitEthernet8/1
+ switchport mode access
+ switchport access vlan 50
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+
+! Laptop
+interface FastEthernet6/7
+ switchport mode access
+ switchport access vlan 50
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+
+! Impresora
+interface FastEthernet7/1
+ switchport mode access
+ switchport access vlan 50
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+
+! Trunk hacia Router
+interface GigabitEthernet9/1
+ description Trunk a Router
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,40,50
+
+📌 Switch 2 (Bodega)
+! Host escritorio
+interface FastEthernet0/2
+ switchport mode access
+ switchport access vlan 50
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+
+! Host escritorio (SALA4)
+interface FastEthernet0/24
+ switchport mode access
+ switchport access vlan 40
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+
+! Impresora
+interface FastEthernet0/23
+ switchport mode access
+ switchport access vlan 50
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+
+! Servidor
+interface FastEthernet0/1
+ switchport mode access
+ switchport access vlan 50
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+
+! Trunk hacia Router
+interface GigabitEthernet0/1
+ description Trunk a Router
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,40,50
+
+! Trunk hacia Switch 3 (SALA1)
+interface GigabitEthernet0/2
+ description Trunk a Switch 3
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,40,50
+
+
+
+📌 Switch 3 (SALA1)
+! 15 Escritorios SALA1
+interface range FastEthernet0/3 - 24
+ switchport mode access
+ switchport access vlan 10
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+
+! Laptop ADMIN
+interface range FastEthernet0/1 - 2
+ switchport mode access
+ switchport access vlan 50
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+
+! Trunk hacia Switch 2 (Bodega)
+interface GigabitEthernet0/2
+ description Trunk a Switch 2
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,40,50
+
+! Trunk hacia Switch 4 (SALA2)
+interface GigabitEthernet0/1
+ description Trunk a Switch 4
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,40,50
+
+
+📌 Switch 4 (SALA2)
+
+! 9 Escritorios SALA2
+interface range FastEthernet0/3 - 24
+ switchport mode access
+ switchport access vlan 20
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+
+! 1 ADMIN
+interface FastEthernet0/1 - 2
+ switchport mode access
+ switchport access vlan 50
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+
+! Trunk hacia Switch 3
+interface GigabitEthernet0/1
+ description Trunk a Switch 3
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,40,50
+
+! Trunk hacia Switch 5
+interface GigabitEthernet0/2
+ description Trunk a Switch 5
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,40,50
+
+
+📌 Switch 5 (SALA3)
+
+! 11 Escritorios SALA3
+interface range FastEthernet0/3 - 24
+ switchport mode access
+ switchport access vlan 30
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+
+! 1 ADMIN
+interface FastEthernet0/1 - 2
+ switchport mode access
+ switchport access vlan 50
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+
+! Trunk hacia Switch 4
+interface GigabitEthernet0/2
+ description Trunk a Switch 4
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,40,50
+
+
+📌 Switch 6 (SALA4 / Access Point)
+! Teléfono (WiFi)
+interface FastEthernet0/1
+ switchport mode access
+ switchport access vlan 40
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+
+! Trunk hacia Router
+interface GigabitEthernet0/1
+ description Trunk a Router
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,40,50
+
+
+⚙️ 3) Configuración básica del Router (router-on-a-stick)
+interface GigabitEthernet0/0/1
+ no shutdown
+
+interface GigabitEthernet0/0/1.10
+ encapsulation dot1Q 10
+ ip address 192.168.10.1 255.255.255.192
+
+interface GigabitEthernet0/0/1.20
+ encapsulation dot1Q 20
+ ip address 192.168.20.1 255.255.255.192
+
+interface GigabitEthernet0/0/1.30
+ encapsulation dot1Q 30
+ ip address 192.168.30.1 255.255.255.192
+
+interface GigabitEthernet0/0/1.40
+ encapsulation dot1Q 40
+ ip address 192.168.40.1 255.255.255.240
+
+interface GigabitEthernet0/0/1.50
+ encapsulation dot1Q 50
+ ip address 192.168.50.1 255.255.255.240
+
+
+✅ 4) DHCP por VLAN en el router
+ip dhcp pool SALA1
+ network 192.168.10.0 255.255.255.192
+ default-router 192.168.10.1
+
+ip dhcp pool SALA2
+ network 192.168.20.0 255.255.255.192
+ default-router 192.168.20.1
+
+ip dhcp pool SALA3
+ network 192.168.30.0 255.255.255.192
+ default-router 192.168.30.1
+
+ip dhcp pool SALA4
+ network 192.168.40.0 255.255.255.240
+ default-router 192.168.40.1
+
+ip dhcp pool ADMIN
+ network 192.168.50.0 255.255.255.240
+ default-router 192.168.50.1
+
+✅ 5) Spanning Tree
+en cada swicth
+spanning-tree mode pvst
+spanning-tree vlan 10,20,30,40,50 priority 4096
+
+
+
+
+
+
+
+switchport mode access
+ switchport access vlan 50
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+
+
+
+
+
+
+✅ 6) EtherChannel (si usas)
+bash
+Copiar
+Editar
+interface range g0/2 - 3
+ channel-group 1 mode active
+
+interface port-channel1
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,40,50
