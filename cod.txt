@@ -118,7 +118,7 @@ interface range FastEthernet0/3 - 24
  spanning-tree bpduguard enable
 
 ! 1 ADMIN
-interface FastEthernet0/1 - 2
+interface range FastEthernet0/1 - 2
  switchport mode access
  switchport access vlan 50
  spanning-tree portfast
@@ -147,7 +147,7 @@ interface range FastEthernet0/3 - 24
  spanning-tree bpduguard enable
 
 ! 1 ADMIN
-interface FastEthernet0/1 - 2
+interface range FastEthernet0/1 - 2
  switchport mode access
  switchport access vlan 50
  spanning-tree portfast
